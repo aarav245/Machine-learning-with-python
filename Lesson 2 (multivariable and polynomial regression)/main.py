@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-dataurl = "http://lib.stat.cmu.edu/datasets/boston"
-rawdf = pd.read_csv(dataurl, sep = "*\s*+", skiprows=22, header = None)
+dataurl = "boston.txt"
+rawdf = pd.read_csv(dataurl, sep =r"\s+", skiprows=22, header = None)
 
 data = np.hstack([rawdf.values[::2,:],rawdf.values[1::2,:2]])
 
@@ -30,8 +30,8 @@ print(boston.head())
 
 boston["MEDV"] = target
 
-X = boston[["LSAT","RM"]]
-Y = boston[["MEDV"]]
+X = boston[["LSTAT","RM"]]
+Y = boston["MEDV"]
 
 from sklearn.model_selection import train_test_split
 
