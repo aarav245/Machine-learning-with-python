@@ -34,33 +34,43 @@ print("Linear regression rmse: ",linearrmse)
 print("\nCoefficients: ")
 for column, coefficient in zip(X.columns, linearmodel.coef_):
     print(column, ":", coefficient)
-    print("\nIntercept:",linearmodel.intercept_)
-    poly = PolynomialFeatures(degree = 2, include_bias=False)
-    xtrainpoly = poly.fit_transform(xtrain)
-    xtestpoly = poly.fit_transform(xtest)
-    polymodel = LinearRegression()
-    polymodel.fit(xtrainpoly,xtestpoly)
-    polypred = polymodel.predict(xtestpoly)
-    polyrmse = mean_squared_error(ytest,polypred)
-    print("\n=============================")
-    print("POLYNOMIAL REGRESSION")
-    print("=============================")
-    print("Polynomial regression rmse: ", polyrmse)
-    print("\n=============================")
-    print("MODEL COMPARISON")
-    print("=============================")
-    print("Linear regression rmse: ",linearrmse)
-    print("Polynomial regression rmse: ", polyrmse)
-    if polyrmse < linearrmse:
-        print("\nPolynomial regression performed better")
-    elif linearrmse < polyrmse:
-        print("\nLinear Regression performed better")
-    else:
-        print("\nBoth models performed the same")
-    comparison = pd.DataFrame(
-        {
-            "Actual Fare": ytest.values,
-            "linear prediction": linearpred,
-            "Polynomial prediction": polypred,
-        }
+print("\nIntercept:",linearmodel.intercept_)
+poly = PolynomialFeatures(degree = 2, include_bias=False)
+xtrainpoly = poly.fit_transform(xtrain)
+xtestpoly = poly.transform(xtest)
+polymodel = LinearRegression()
+polymodel.fit(xtrainpoly,ytrain)
+polypred = polymodel.predict(xtestpoly)
+polyrmse = mean_squared_error(ytest,polypred) ** 0.5
+print("\n=============================")
+print("POLYNOMIAL REGRESSION")
+print("=============================")
+print("Polynomial regression rmse: ", polyrmse)
+print("\n=============================")
+print("MODEL COMPARISON")
+print("=============================")
+print("Linear regression rmse: ",linearrmse)
+print("Polynomial regression rmse: ", polyrmse)
+if polyrmse < linearrmse:
+    print("\nPolynomial regression performed better")
+elif linearrmse < polyrmse:
+    print("\nLinear Regression performed better")
+else:
+    print("\nBoth models performed the same")
+comparison = pd.DataFrame(
+    {
+        "Actual Fare": ytest.values,
+        "linear prediction": linearpred,
+        "Polynomial prediction": polypred,
+    }
     )
+print("\n========================")
+print(comparison.head(10))
+plt.figure(figsize=(10,6))
+plt.scatter(ytest,linearpred,label = "Linear Regression")
+plt.scatter(ytest,polypred,label = "Polynomial Regression")
+plt.xlabel("Actual Fare")
+plt.ylabel("Predicted Fare")
+plt.title("Titanic Fare Prediction")
+plt.legend()
+plt.show()
