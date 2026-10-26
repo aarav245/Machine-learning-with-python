@@ -5,33 +5,65 @@ import seaborn as sns
 
 data = pd.read_csv("titanic.csv")
 
+print("Dataset shape:", data.shape)
+print("\nMissing values")
 print(data.isnull().sum())
 
-print("Median of age column %.2f"%(data["Age"].median(skipna=True)))
-print(
-    "Percent of missing records in cabin %.2f"
-    %((data["Cabin"].isnull().sum()/data.shape[0])*100)
+print("Median of age column: %.2f" % data["Age"].median())
+
+print("Missing age percentage:%.2f%%" % (data["Age"].isnull().sum()/len(data)*100))
+
+data["Age"] = data["Age"].fillna(data["Age"].median())
+data["Fare"] = data["Fare"].fillna(data["Fare"].median())
+
+print("\nMissing values after preprocsessing:")
+print(data.isnull().sum())
+
+data["TravelAlone"] = np.where(
+    (data["Siblings/Spouses Aboard"]+data["Parents/Children Aboard"]) > 0,0,1
+    
 )
-print("Most common boarding point: %s" % data["Embarked"].value_counts().idxmax())
+data.drop(columns = ["Siblings/Spouses Aboard","Parents/Children Aboard"],inplace = True)
 
-data["Age"].fillna(data["Age"].median(skipna = True), inplace = True)
-data["Embarked"].fillna(data["Embarked"].value_counts().idxmax(), inplace = True)
-data.drop("Cabin",axis = 1,inplace=True)
+data["Sex"] = data["Sex"].map({"male":0,"female":1})
 
-print(data.isnull().sum())
-data.drop("PassengerId",axis = 1,inplace=True)
-data.drop("Name",axis=1,inplace=True)
-data.drop("Ticket",axis=1,inplace=True)
-
-data["TravelAlone"] = np.where((data["SibSp"]+data["Parch"])>0,0,1)
-
-data.drop("SibSp",axis=1,inplace=True)
-data.drop("Parch",axis=1,inplace=True)
-
+print("\nProcessed data")
 print(data.head())
 
-from sklearn import preprocessing
+X = data[["Pclass","Sex","Age","Fare","TravelAlone"]]
+Y = data["Survived"]
 
-labelencoder = preprocessing.LabelEncoder()
-data["Sex"] = labelencoder.fit_transform(data["Sex"])
-data["Embarked"] = labelencoder.fit_transform(data["Embarked"])
+from sklearn.model_selection import train_test_split
+
+xtrain,xtest,ytrain,ytest = train_test_split(X,Y,test_size=.2,random_state=2,stratify=Y)
+
+print("\nTraining records: ",len(xtrain))
+print("Testing records: ",len(xtest))
+
+from sklearn.linear_model import LogisticRegression
+
+linmodel = LogisticRegression(max_iter=1000)
+linmodel.fit(xtrain,ytrain)
+
+ypred = linmodel.predict(xtest)
+print("\nPredicted values: ")
+print(ypred)
+
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+
+matrix = confusion_matrix(ytest,ypred)
+
+print("\nConfusion Matrix: ")
+print(matrix)
+
+sns.heatmap(matrix,annot=True,fmt="d")
+
+plt.title("Confusion Matrix")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.show()
+
+print("\n Classification report: ")
+print(classification_report(ytest,ypred))
+
+print("Accuracy: %.2f%%" % (accuracy_score(ytest,ypred)*100))
