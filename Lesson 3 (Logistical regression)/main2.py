@@ -25,3 +25,15 @@ print("\nConfusion matrix: ")
 print(confusion_matrix(ytest,ypred))
 print("\nClassification report: ")
 print(classification_report(ytest,ypred,target_names=data.target_names))
+
+newexample = xtest.iloc[[0]]
+
+prediction = model.predict(newexample)[0]
+probabilities = model.predict_proba(newexample)[0]
+
+print("\nNew Example Prediction: ")
+print("Predicted class: ",data.target_names[prediction])
+print("Class probabilities: ")
+
+for classname, probability in zip(data.target_names,probabilities):
+    print(f"{classname}:{probability:.2%}")
