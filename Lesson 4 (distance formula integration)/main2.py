@@ -31,6 +31,7 @@ ypred = classifier.predict(xtest)
 print("Accuracy: ",accuracy_score(ytest,ypred))
 matrix = confusion_matrix(ytest,ypred)
 
+
 sns.heatmap(
     matrix,
     annot=True,
@@ -42,4 +43,36 @@ sns.heatmap(
 plt.title("Wine KNN Confusion Matrix")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
+plt.show()
+
+xmin, xmax = X[:,0].min()-1,X[:,0].max()+1
+ymin, ymax = X[:,0].min()-1,X[:,0].max()+1
+
+xx,yy = np.meshgrid(
+    np.arange(xmin,xmax,.05),
+    np.arange(ymin,ymax,.05),
+)
+
+grid = np.c_[xx.ravel(),yy.ravel()]
+grid_scaled = scaler.transform(grid)
+
+Z = classifier.predict(grid_scaled)
+Z = Z.reshape(xx.shape)
+
+plt.figure(figsize=(9,6))
+
+plt.contourf(xx,yy,Z,alpha=.3,cmap = "viridis")
+
+plt.scatter(
+    X[:,0],
+    X[:,1],
+    c=Y,
+    cmap = "viridis",
+    edgecolors = "black",
+)
+
+plt.xlabel("Alcohol")
+plt.ylabel("Color intensity")
+plt.title("KNN wine classification decision boundary")
+
 plt.show()
